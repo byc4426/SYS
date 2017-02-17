@@ -16,10 +16,6 @@
 
 package com.google.zxing.client.android;
 
-import com.google.zxing.ResultPoint;
-import com.google.zxing.client.android.camera.CameraManager;
-import com.surui.sys.R;
-
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -27,9 +23,11 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
+
+import com.google.zxing.ResultPoint;
+import com.google.zxing.client.android.camera.CameraManager;
+import com.surui.sys.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,9 +61,8 @@ public final class ViewfinderView extends View {
 
     public static int X;
     public static int Y;
+    public static float baseValue = 1;
     public static boolean change;
-    protected int lastX;
-    protected int lastY;
 
     // This constructor is used when the class is built from an XML resource.
     public ViewfinderView(Context context, AttributeSet attrs) {

@@ -21,6 +21,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.Camera;
 import android.os.Handler;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
@@ -62,8 +63,6 @@ public final class CameraManager {
      * clear the handler so it will only receive one message.
      */
     private final PreviewCallback previewCallback;
-    private int xx;
-    private int yy;
 
     public CameraManager(Context context) {
         this.context = context;
@@ -216,7 +215,7 @@ public final class CameraManager {
      * @return The rectangle to draw on screen in window coordinates.
      */
     public synchronized Rect getFramingRect() {
-        if(ViewfinderView.change){
+        if (ViewfinderView.change) {
             framingRect = null;
         }
         if (framingRect == null) {
@@ -229,10 +228,21 @@ public final class CameraManager {
                 return null;
             }
 
+            int statusBarHeight = -1;//状态栏高度
+            int resourceId = context.getResources().getIdentifier("status_bar_height", "dimen", "android");
+            if (resourceId > 0) {
+                statusBarHeight = context.getResources().getDimensionPixelSize(resourceId);
+            }
 //      int width = findDesiredDimensionInRange(screenResolution.x, MIN_FRAME_WIDTH, MAX_FRAME_WIDTH);
 //      int height = findDesiredDimensionInRange(screenResolution.y, MIN_FRAME_HEIGHT, MAX_FRAME_HEIGHT);
-            int width = findDesiredDimensionInRange(screenResolution.x, MIN_FRAME_WIDTH, MAX_FRAME_WIDTH);
-            int height = width / 3;
+            int width = (int) (findDesiredDimensionInRange(screenResolution.x, MIN_FRAME_WIDTH, MAX_FRAME_WIDTH) * ViewfinderView.baseValue);
+            if (width > screenResolution.x / 5 * 4) {
+                width = screenResolution.x / 5 * 4;
+            }
+            if (width <= 0) {
+                width = 100;
+            }
+            int height = width / 7 * 2;
 
             int leftOffset = (screenResolution.x - width) / 2 + ViewfinderView.X;
             int topOffset = (screenResolution.y - height) / 2 + ViewfinderView.Y;
@@ -246,16 +256,15 @@ public final class CameraManager {
                 topOffset = 0;
             }
             if (topOffset > screenResolution.y - height) {
-                topOffset = screenResolution.y - height;
+                topOffset = screenResolution.y - height - statusBarHeight;
             }
             framingRect = new Rect(leftOffset, topOffset, leftOffset + width, topOffset + height);
-            Log.e(TAG, "Calculated framing rect: " + framingRect.toString());
         }
         return framingRect;
     }
 
     private static int findDesiredDimensionInRange(int resolution, int hardMin, int hardMax) {
-        int dim = 5 * resolution / 8; // Target 5/8 of each dimension
+        int dim = 4 * resolution / 8; // Target 5/8 of each dimension
         if (dim < hardMin) {
             return hardMin;
         }
@@ -272,7 +281,7 @@ public final class CameraManager {
      * @return {@link Rect} expressing barcode scan area in terms of the preview size
      */
     public synchronized Rect getFramingRectInPreview() {
-        if(ViewfinderView.change){
+        if (ViewfinderView.change) {
             framingRectInPreview = null;
         }
         if (framingRectInPreview == null) {

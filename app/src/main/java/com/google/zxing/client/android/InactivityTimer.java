@@ -32,7 +32,7 @@ final class InactivityTimer {
 
   private static final String TAG = InactivityTimer.class.getSimpleName();
 
-  private static final long INACTIVITY_DELAY_MS = 5 * 60 * 1000L;
+  private static final long INACTIVITY_DELAY_MS = 2 * 60 * 1000L;
 
   private final Activity activity;
   private final BroadcastReceiver powerStatusReceiver;
