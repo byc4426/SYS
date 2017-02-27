@@ -27,8 +27,20 @@ import java.util.ArrayList;
 public class Util {
     public static byte[] bytes;
 
-    public static File createDirectory(String DirName) {
-        File file = new File(getSDCardPath().trim(), DirName.trim());
+    public static File createDirectory(Context ct, String DirName) {
+        ArrayList<StorageBean> storageData = StorageUtils.getStorageData(ct);
+        String path = "";
+        for (StorageBean s : storageData) {
+            if (s.getRemovable()) {//是否可移除，是则是外置存储，USB或SD卡
+                if (s.getMounted().equals("mounted")) {//是否已挂载
+                    path = s.getPath();//获取此存储介质的真实路径
+                }
+            }
+        }
+        if (TextUtils.isEmpty(path) || path.equals("")) {
+            path = getSDCardPath();
+        }
+        File file = new File(path.trim(), DirName.trim());
         if (!file.exists()) {
             file.mkdirs();
         }
@@ -141,22 +153,21 @@ public class Util {
      * @param bm
      * @throws IOException
      */
-    public static String saveFile(Context ct ,Bitmap bm, String fileName) {
+    public static String saveFile(Context ct, Bitmap bm, String fileName) {
         ArrayList<StorageBean> storageData = StorageUtils.getStorageData(ct);
         String path = "";
-        for(StorageBean s:storageData){
-            if(s.getRemovable()){//是否可移除，是则是外置存储，USB或SD卡
-                if(s.getMounted().equals("mounted")){//是否已挂载
+        for (StorageBean s : storageData) {
+            if (s.getRemovable()) {//是否可移除，是则是外置存储，USB或SD卡
+                if (s.getMounted().equals("mounted")) {//是否已挂载
                     path = s.getPath();//获取此存储介质的真实路径
                 }
             }
         }
-        if(TextUtils.isEmpty(path)){
+        if (TextUtils.isEmpty(path) || path.equals("")) {
             path = getSDCardPath();
         }
-        Log.e("path",path);
-        File dir = new File(path,
-                "AAA");
+        Log.e("path", path);
+        File dir = new File(path.trim(), "AAA");
         if (!dir.exists()) {
             dir.mkdirs();
         }
@@ -173,99 +184,4 @@ public class Util {
         }
         return file.getAbsolutePath();
     }
-
-
-    /**
-     * String 转 Unicode
-     *
-     * @param str
-     * @return
-     */
-    public static String toUnicode(String str) {
-        char[] arChar = str.toCharArray();
-        int iValue = 0;
-        String uStr = "";
-        for (int i = 0; i < arChar.length; i++) {
-            iValue = (int) str.charAt(i);
-            if (iValue <= 256) {
-                uStr += "\\u00" + Integer.toHexString(iValue);
-            } else {
-                uStr += "\\u" + Integer.toHexString(iValue);
-            }
-        }
-        return uStr;
-    }
-
-    /**
-     * Unicode 转 String
-     *
-     * @param theString
-     * @return
-     */
-    public static String decodeUnicode(String theString) {
-        char aChar;
-        int len = theString.length();
-        StringBuffer outBuffer = new StringBuffer(len);
-        for (int x = 0; x < len; ) {
-            aChar = theString.charAt(x++);
-            if (aChar == '\\') {
-                aChar = theString.charAt(x++);
-                if (aChar == 'u') {
-                    // Read the xxxx
-                    int value = 0;
-                    for (int i = 0; i < 4; i++) {
-                        aChar = theString.charAt(x++);
-                        switch (aChar) {
-                            case '0':
-                            case '1':
-                            case '2':
-                            case '3':
-                            case '4':
-                            case '5':
-                            case '6':
-                            case '7':
-                            case '8':
-                            case '9':
-                                value = (value << 4) + aChar - '0';
-                                break;
-                            case 'a':
-                            case 'b':
-                            case 'c':
-                            case 'd':
-                            case 'e':
-                            case 'f':
-                                value = (value << 4) + 10 + aChar - 'a';
-                                break;
-                            case 'A':
-                            case 'B':
-                            case 'C':
-                            case 'D':
-                            case 'E':
-                            case 'F':
-                                value = (value << 4) + 10 + aChar - 'A';
-                                break;
-                            default:
-                                throw new IllegalArgumentException(
-                                        "Malformed   \\uxxxx   encoding.");
-                        }
-
-                    }
-                    outBuffer.append((char) value);
-                } else {
-                    if (aChar == 't')
-                        aChar = '\t';
-                    else if (aChar == 'r')
-                        aChar = '\r';
-                    else if (aChar == 'n')
-                        aChar = '\n';
-                    else if (aChar == 'f')
-                        aChar = '\f';
-                    outBuffer.append(aChar);
-                }
-            } else
-                outBuffer.append(aChar);
-        }
-        return outBuffer.toString();
-    }
-
 }

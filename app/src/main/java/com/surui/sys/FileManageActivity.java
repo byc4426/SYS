@@ -2,7 +2,9 @@ package com.surui.sys;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -31,7 +33,7 @@ public class FileManageActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_file_manage);
-        filess = Util.createDirectory("AAA").listFiles();//文件列表
+        filess = Util.createDirectory(FileManageActivity.this,"AAA").listFiles();//文件列表
         openDir = (TextView) findViewById(R.id.openDir);
 //        openDir.setText(Util.createDirectory("AAA").getAbsolutePath());
         this.listview = (ListView) findViewById(R.id.listview);
@@ -43,8 +45,7 @@ public class FileManageActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Log.e("---", "bbbbbbb");
-        filess = Util.createDirectory("AAA").listFiles();//文件列表
+        filess = Util.createDirectory(FileManageActivity.this,"AAA").listFiles();//文件列表
         adapter.notifyDataSetChanged();
     }
 
@@ -92,10 +93,18 @@ public class FileManageActivity extends AppCompatActivity {
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     //设置intent的Action属性
                     intent.setAction(Intent.ACTION_VIEW);
-                    //设置intent的data和Type属性。
-                    intent.setDataAndType(/*uri*/Uri.fromFile(filess[position]), "image/*");
-                    //跳转
-                    startActivity(intent);
+                    if (Build.VERSION.SDK_INT >= 24) {//判读版本是否在7.0以上
+                        Uri imageUri = FileProvider.getUriForFile(getApplicationContext(), "com.surui.sys.fileprovider", filess[position]);
+                        //添加这一句表示对目标应用临时授权该Uri所代表的文件
+                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        //设置intent的data和Type属性。
+                        intent.setDataAndType(imageUri, "image/*");
+                        //跳转
+                        startActivity(intent);
+                    } else {
+                        intent.setDataAndType(Uri.fromFile(filess[position]), "image/*");
+                        startActivity(intent);
+                    }
                 }
             });
             return convertView;

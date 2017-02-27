@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
         openDir.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openAssignFolder(Util.createDirectory("AAA"));
+                openAssignFolder(Util.createDirectory(MainActivity.this, "AAA"));
             }
         });
         but.setOnClickListener(new View.OnClickListener() {
@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
                         MY_PERMISSIONS_REQUEST_RE);
             }
         } else {
-            Util.createDirectory("AAA");
+            Util.createDirectory(MainActivity.this, "AAA");
         }
 
     }
@@ -118,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
         }
         if (requestCode == MY_PERMISSIONS_REQUEST_RE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Util.createDirectory("AAA");
+                Util.createDirectory(MainActivity.this, "AAA");
             } else {
                 // Permission Denied
                 Toast.makeText(MainActivity.this, "申请权限失败！", Toast.LENGTH_SHORT).show();
